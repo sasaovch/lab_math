@@ -10,7 +10,6 @@ import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeMap;
 import java.util.function.Function;
 
 import javax.swing.*;
@@ -29,21 +28,23 @@ public class DrawGraph extends JPanel {
    public static final Stroke GRAPH_STROKE = new BasicStroke(3f);
    public static final int GRAPH_POINT_WIDTH = 1;
    public static final int Y_HATCH_CNT = 1;
-   public static final int RESOLUTION = 10000;
+   public static final int RESOLUTION = 100;
+   public Way way;
    public List<Double> scores;
    public Double start, finish, gap;
    public DrawLog log;
-   public TreeMap<Double, Double> map;
+   public ArrayList<Double[]> map;
    public String[] mess;
 
-   public DrawGraph(List<Double> scores2, Double start, Double finish, Double gap, TreeMap<Double, Double> map, String[] mess) {
-      this.scores = scores2;
+   public DrawGraph(List<Double> scores, Double start, Double finish, Double gap, ArrayList<Double[]> map, String[] mess, Way way) {
+      this.scores = scores;
       this.start = start;
       this.finish = finish;
       this.gap = gap;
       log = new DrawLog();
       this.map = map;
       this.mess = mess;
+      this.way = way;
    }
    
    @Override
@@ -53,14 +54,21 @@ public class DrawGraph extends JPanel {
       Graphics2D g2 = (Graphics2D)g;
       g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
    
-      log.drawLog(g2, map, start, finish, gap);
-   
+      if (way == Way.RECTANGLE) {
+         log.drawRect(g2, map, start, finish, gap);
+      } else if (way == Way.TRAPEZOID) {
+         log.drawTrap(g2, map, start, finish, gap);
+      } else {
+         log.drawSimp(g2, map, start, finish, gap);
+      }
+      
+      g2.setColor(Color.GRAY);
       double xScale = ((double) PREF_W - 2 * BORDER_GAP) / (RESOLUTION);
       double yScale = ((double) PREF_H - 2 * BORDER_GAP) / MAX_SCORE;
-
+      
       List<Point> graphPoints = new ArrayList<Point>();
 
-      for (int i = 0; i < RESOLUTION; i++) {
+      for (int i = 0; i <= RESOLUTION; i++) {
          int x1 = (int) (i * xScale + BORDER_GAP);
          int y1 = (int) ((MAX_SCORE - scores.get(i)) * yScale + BORDER_GAP);
          graphPoints.add(new Point(x1, y1));
@@ -98,12 +106,12 @@ public class DrawGraph extends JPanel {
          int y2 = graphPoints.get(i + 1).y;
          g2.drawLine(x1, y1, x2, y2);         
       }
-
+      
       g2.setStroke(oldStroke);      
       g2.setColor(GRAPH_POINT_COLOR);
       for (int i = 0; i < graphPoints.size(); i++) {
          int x = graphPoints.get(i).x - GRAPH_POINT_WIDTH / 2;
-         int y = graphPoints.get(i).y - GRAPH_POINT_WIDTH / 2;;
+         int y = graphPoints.get(i).y - GRAPH_POINT_WIDTH / 2;
          int ovalW = GRAPH_POINT_WIDTH;
          int ovalH = GRAPH_POINT_WIDTH;
          g2.fillOval(x, y, ovalW, ovalH);
@@ -123,18 +131,18 @@ public class DrawGraph extends JPanel {
          g2.draw(sh); 
       }
    }
-
+   
    @Override
    public Dimension getPreferredSize() {
       return new Dimension(PREF_W, PREF_H);
    }
 
-   public static void createAndShowGui(Double start, Double finish, TreeMap<Double, Double> map, Double gap, Function<Double,Double> func, String[] mess) {
+   public static void createAndShowGui(Double start, Double finish, ArrayList<Double[]> map, Double gap, Function<Double,Double> func, String[] mess, Way way) {
       List<Double> scores = new ArrayList<>();
-      for (int i = 0; i < RESOLUTION ; i++) {
+      for (int i = 0; i <= RESOLUTION ; i++) {
          scores.add(func.apply(start + i * (finish - start) / RESOLUTION));
       }
-      DrawGraph mainPanel = new DrawGraph(scores, start, finish, gap, map, mess);
+      DrawGraph mainPanel = new DrawGraph(scores, start, finish, gap, map, mess, way);
       MAX_SCORE = func.apply(finish);
 
       JFrame frame = new JFrame("DrawGraph");
@@ -145,10 +153,10 @@ public class DrawGraph extends JPanel {
       frame.setVisible(true);
    }
 
-   public static void start(Double start, Double finish, TreeMap<Double, Double> map, Double gap, Function<Double, Double> func, String[] mess) {
+   public static void start(Double start, Double finish, ArrayList<Double[]> map, Double gap, Function<Double, Double> func, String[] mess, Way way) {
       SwingUtilities.invokeLater(new Runnable() {
          public void run() {
-            createAndShowGui(start, finish, map, gap, func, mess);
+            createAndShowGui(start, finish, map, gap, func, mess, way);
          }
       });
    }

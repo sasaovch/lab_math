@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.util.TreeMap;
+import java.util.ArrayList;
 import java.util.function.Function;
 
 public class App {
@@ -14,54 +14,36 @@ public class App {
     private final static Function<Double, Double> funct = s -> Math.pow(s, 2);
 
     public static void main(String[] args) throws Exception {
+        Way way = write("Enter the integration method: rectangle, trapezoid, simpson", s -> Way.valueOf(s.toUpperCase()));
         int start = write("Enter start point", Integer::parseInt);
         int finish = write("Enter finish point", Integer::parseInt);
         Double startPoint = (double) start;
         Double finishPoint = (double) finish;
         Integer numberSplitPoint = write("Enter number split points", Integer::parseInt);
-        String wayforSplit = write("Enter way for split: left, rigth, center, random", s -> s);
         double length = finishPoint - startPoint;
         double gap = length / numberSplitPoint;
-        double left = startPoint;
-        double rigth = startPoint + gap;
-        TreeMap<Double, Double> points = new TreeMap<>();
+        ArrayList<Double[]> points = new ArrayList<>();
         double result = 0;
-        double point;
-        for (int i = 1; i <= numberSplitPoint; i++) {
-            switch (wayforSplit) {
-                case "left" :
-                    point = funct.apply(left);
-                    points.put(left, point);
-                    left = rigth;
-                    rigth += gap;
-                    result += point * gap;
-                    break;
-                case "rigth" :
-                    point = funct.apply(rigth);
-                    points.put(left, point);
-                    left = rigth;
-                    rigth += gap;
-                    result += point * gap;
-                    break;
-                case "center" :
-                    point = funct.apply(((left + rigth)/ 2));
-                    points.put(left, point);
-                    left = rigth;
-                    rigth += gap;
-                    result += point * gap;
-                    break;
-                case "random" :
-                    point = funct.apply(Math.random() * gap + left);
-                    points.put(left, point);
-                    left = rigth;
-                    rigth += gap;
-                    result += point * gap;
-                    break;
-            }
+        String[] mess = null;
+        if (way == Way.RECTANGLE) {
+            String wayforSplit = write("Enter way for split: left, rigth, center, random", s -> s);
+            Rectangle r = new Rectangle();
+            result = r.main(start, finish, numberSplitPoint, wayforSplit, funct);
+            points = r.getPoints();
+            mess = new String[]{"Integral = " + String.format("%.4f", result) , "The integration method - " + Way.RECTANGLE.getName(), "Way split - " + wayforSplit, "Number split points = " + numberSplitPoint}; 
+        } else if (way == Way.TRAPEZOID) {
+            Trapezoid t = new Trapezoid();
+            result = t.main(start, finish, numberSplitPoint, funct);
+            points =t.getPoints();
+            mess = new String[]{"Integral = " + String.format("%.4f", result) , "The integration method - " + Way.TRAPEZOID.getName(), "Number split points = " + numberSplitPoint}; 
+        } else if (way == Way.SIMPSON) {
+            Simpson s = new Simpson();
+            result = s.main(start, finish, numberSplitPoint, funct);
+            points =s.getPoints();
+            mess = new String[]{"Integral = " + String.format("%.4f", result) , "The integration method - " + Way.SIMPSON.getName(), "Number split points = " + numberSplitPoint}; 
         }
-        String[] mess = new String[]{"Integral = " + String.format("%.4f", result) , "Way split - " + wayforSplit,"Number split points = " + numberSplitPoint}; 
-        out.println(result);
-        DrawGraph.start(startPoint, finishPoint, points, gap, x -> Math.pow(x, 2), mess);
+        out.printf("Result = %.4f", result);
+        DrawGraph.start(startPoint, finishPoint, points, gap, x -> Math.pow(x, 2), mess, way);
     }
     
     public static <T> T write(String message, Function<String, T> funct) throws IOException {
@@ -72,7 +54,7 @@ public class App {
             T result;
             try {
                 result = funct.apply(line);
-            } catch (NumberFormatException e) {
+            } catch (IllegalArgumentException e) {
                 out.println("It isn't correct");
                 continue;
             } 
