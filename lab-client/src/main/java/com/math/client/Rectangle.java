@@ -7,18 +7,16 @@ public class Rectangle {
 
     private ArrayList<Double[]> points;
 
-    public double main(int start, int finish, Integer numberSplitPoint, String wayforSplit, Function<Double, Double> funct) {
-        Double startPoint = (double) start;
-        Double finishPoint = (double) finish;
-        double length = finishPoint - startPoint;
+    public double main(int start, int finish, Integer numberSplitPoint, WayPoint wayforSplit, Function<Double, Double> funct) {
+        double length = finish - start;
         double gap = length / numberSplitPoint;
-        double left = startPoint;
-        double rigth = startPoint + gap;
+        double left = start;
+        double rigth = start + gap;
         points = new ArrayList<>();
         double result = 0;
         double point;
         for (int i = 1; i <= numberSplitPoint; i++) {
-            switch (wayforSplit) {
+            switch (wayforSplit.getName()) {
                 case "left" :
                     point = funct.apply(left);
                     points.add(new Double[]{point});

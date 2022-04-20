@@ -19,41 +19,41 @@ import java.awt.geom.*;
 
 
 public class DrawGraph extends JPanel {
-   public static Double MAX_SCORE;
-   public static final int PREF_W = 1024;
-   public static final int PREF_H = 720;
-   public static final int BORDER_GAP = 30;
-   public static final Color GRAPH_COLOR = Color.green;
-   public static final Color GRAPH_POINT_COLOR = new Color(150, 50, 50, 180);
-   public static final Stroke GRAPH_STROKE = new BasicStroke(3f);
-   public static final int GRAPH_POINT_WIDTH = 1;
-   public static final int Y_HATCH_CNT = 1;
-   public static final int RESOLUTION = 100;
-   public Way way;
-   public List<Double> scores;
-   public Double start, finish, gap;
-   public DrawLog log;
-   public ArrayList<Double[]> map;
-   public String[] mess;
+   private final int PREF_W = 1024;
+   private final int PREF_H = 720;
+   private final int BORDER_GAP = 30;
+   private final Color GRAPH_COLOR = Color.green;
+   private final Color GRAPH_POINT_COLOR = new Color(150, 50, 50, 180);
+   private final Stroke GRAPH_STROKE = new BasicStroke(3f);
+   private final int GRAPH_POINT_WIDTH = 1;
+   private final int Y_HATCH_CNT = 1;
+   private final int RESOLUTION = 100;
+   private Double MAX_SCORE;
+   private Way way;
+   private Double start, finish, gap;
+   private ArrayList<Double[]> map;
+   private String[] mess;
+   private Function<Double, Double> funct;
+   private List<Double> scores;
 
-   public DrawGraph(List<Double> scores, Double start, Double finish, Double gap, ArrayList<Double[]> map, String[] mess, Way way) {
-      this.scores = scores;
+   public DrawGraph(Double start, Double finish, double gap, ArrayList<Double[]> map, Function<Double, Double> funct, String[] mess, Way way) {
       this.start = start;
       this.finish = finish;
       this.gap = gap;
-      log = new DrawLog();
       this.map = map;
       this.mess = mess;
       this.way = way;
+      this.funct = funct;
    }
    
    @Override
    protected void paintComponent(Graphics g) {
-
+      
       super.paintComponent(g);
       Graphics2D g2 = (Graphics2D)g;
       g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-   
+      
+      DrawLog log = new DrawLog(PREF_W, PREF_H, BORDER_GAP, MAX_SCORE);
       if (way == Way.RECTANGLE) {
          log.drawRect(g2, map, start, finish, gap);
       } else if (way == Way.TRAPEZOID) {
@@ -137,27 +137,27 @@ public class DrawGraph extends JPanel {
       return new Dimension(PREF_W, PREF_H);
    }
 
-   public static void createAndShowGui(Double start, Double finish, ArrayList<Double[]> map, Double gap, Function<Double,Double> func, String[] mess, Way way) {
-      List<Double> scores = new ArrayList<>();
+   public void startDraw() {
+      scores = new ArrayList<>();
       for (int i = 0; i <= RESOLUTION ; i++) {
-         scores.add(func.apply(start + i * (finish - start) / RESOLUTION));
+         scores.add(funct.apply(start + i * (finish - start) / RESOLUTION));
       }
-      DrawGraph mainPanel = new DrawGraph(scores, start, finish, gap, map, mess, way);
-      MAX_SCORE = func.apply(finish);
+
+      MAX_SCORE = funct.apply(finish);
 
       JFrame frame = new JFrame("DrawGraph");
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      frame.getContentPane().add(mainPanel);
+      frame.getContentPane().add(this);
       frame.pack();
       frame.setLocationByPlatform(true);
       frame.setVisible(true);
    }
 
-   public static void start(Double start, Double finish, ArrayList<Double[]> map, Double gap, Function<Double, Double> func, String[] mess, Way way) {
-      SwingUtilities.invokeLater(new Runnable() {
-         public void run() {
-            createAndShowGui(start, finish, map, gap, func, mess, way);
-         }
-      });
-   }
+   // public static void start(Double start, Double finish, ArrayList<Double[]> map, Double gap, Function<Double, Double> func, String[] mess, Way way) {
+   //    SwingUtilities.invokeLater(new Runnable() {
+   //       public void run() {
+   //          createAndShowGui(start, finish, map, gap, func, mess, way);
+   //       }
+   //    });
+   // }
 }

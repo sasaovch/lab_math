@@ -8,12 +8,10 @@ public class Trapezoid {
     private ArrayList<Double[]> points;
 
     public double main(int start, int finish, Integer numberSplitPoint, Function<Double, Double> funct) {
-        Double startPoint = (double) start;
-        Double finishPoint = (double) finish;
-        double length = finishPoint - startPoint;
+        double length = finish - start;
         double gap = length / numberSplitPoint;
-        double left = startPoint;
-        double rigth = startPoint + gap;
+        double left = start;
+        double rigth = start + gap;
         points = new ArrayList<>();
         double result = 0;
         double pointLeft, pointRight;
