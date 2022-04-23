@@ -1,39 +1,41 @@
 package com.math.client;
 
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.Polygon;
+import java.awt.Color;
 import java.util.ArrayList;
 
 
 public class DrawLog {
-    private final int PREF_W;
-    private final int PREF_H;
-    private final int BORDER_GAP;
-    private final double MAX_SCORE;
+    private final int prefW;
+    private final int prefH;
+    private final int borderGap;
+    private final double maxScore;
 
-    public DrawLog(int pref_w, int pref_h, int border_gap, double max_score) {
-        PREF_W = pref_w;
-        PREF_H = pref_h;
-        BORDER_GAP = border_gap;
-        MAX_SCORE = max_score;
+    public DrawLog(int prefW, int prefH, int borderGap, double maxScore) {
+        this.prefW = prefW;
+        this.prefH = prefH;
+        this.borderGap = borderGap;
+        this.maxScore = maxScore;
     }
 
     public void drawRect(Graphics2D gr, ArrayList<Double[]> map, Double start, Double finish, Double gap) {
         int counter = 0;
-        double xScale = ((double) PREF_W - 2 * BORDER_GAP) / (map.size());
-        double yScale = ((double) PREF_H - 2 * BORDER_GAP)/ MAX_SCORE;
+        double xScale = ((double) prefW - 2 * borderGap) / (map.size());
+        double yScale = ((double) prefH - 2 * borderGap) / maxScore;
         int x1, x2, x3, x4;
         int y1, y2, y3, y4;
         for (int i = 0; i < map.size(); i++) {
-            Polygon p = new Polygon();
             Double[] coord = map.get(i);
-            x1 = (int) (xScale * (counter) + BORDER_GAP);
-            y1 = (int) ((MAX_SCORE - coord[0]) * yScale + BORDER_GAP);
-            x2 = (int) (xScale * (counter++) + BORDER_GAP);
-            y2 = (int) (PREF_H - BORDER_GAP);
-            x3 = (int) (xScale * (counter) + BORDER_GAP);
+            x1 = (int) (xScale * (counter) + borderGap);
+            y1 = (int) ((maxScore - coord[0]) * yScale + borderGap);
+            x2 = (int) (xScale * (counter++) + borderGap);
+            y2 = (int) (prefH - borderGap);
+            x3 = (int) (xScale * (counter) + borderGap);
             y3 = y2;
-            x4 = (int) (xScale * (counter) + BORDER_GAP);
+            x4 = (int) (xScale * (counter) + borderGap);
             y4 = y1;
+            Polygon p = new Polygon();
             p.addPoint(x1, y1);
             p.addPoint(x2, y2);
             p.addPoint(x3, y3);
@@ -45,21 +47,21 @@ public class DrawLog {
 
     public void drawTrap(Graphics2D gr, ArrayList<Double[]> map, Double start, Double finish, Double gap) {
         int counter = 0;
-        double xScale = ((double) PREF_W - 2 * BORDER_GAP) / (map.size());
-        double yScale = ((double) PREF_H - 2 * BORDER_GAP)/ MAX_SCORE;
+        double xScale = ((double) prefW - 2 * borderGap) / (map.size());
+        double yScale = ((double) prefH - 2 * borderGap) / maxScore;
         int x1, x2, x3, x4;
         int y1, y2, y3, y4;
         for (int i = 0; i < map.size(); i++) {
-            Polygon p = new Polygon();
             Double[] coord = map.get(i);
-            x1 = (int) (xScale * (counter) + BORDER_GAP);
-            y1 = (int) ((MAX_SCORE - coord[0]) * yScale + BORDER_GAP);
-            x2 = (int) (xScale * (counter++) + BORDER_GAP);
-            y2 = (int) (PREF_H - BORDER_GAP);
-            x3 = (int) (xScale * (counter) + BORDER_GAP);
+            x1 = (int) (xScale * (counter) + borderGap);
+            y1 = (int) ((maxScore - coord[0]) * yScale + borderGap);
+            x2 = (int) (xScale * (counter++) + borderGap);
+            y2 = (int) (prefH - borderGap);
+            x3 = (int) (xScale * (counter) + borderGap);
             y3 = y2;
-            x4 = (int) (xScale * (counter) + BORDER_GAP);
-            y4 = (int) ((MAX_SCORE - coord[1]) * yScale + BORDER_GAP);
+            x4 = (int) (xScale * (counter) + borderGap);
+            y4 = (int) ((maxScore - coord[1]) * yScale + borderGap);
+            Polygon p = new Polygon();
             p.addPoint(x1, y1);
             p.addPoint(x2, y2);
             p.addPoint(x3, y3);
@@ -69,29 +71,28 @@ public class DrawLog {
         }
     }
 
-    
     public void drawSimp(Graphics2D gr, ArrayList<Double[]> map, Double start, Double finish, Double gap) {
         int counter = 0;
-        double xScale = ((double) PREF_W - 2 * BORDER_GAP) / (map.size()) / 2;
-        double yScale = ((double) PREF_H - 2 * BORDER_GAP)/ MAX_SCORE;
+        double xScale = ((double) prefW - 2 * borderGap) / (map.size()) / 2;
+        double yScale = ((double) prefH - 2 * borderGap) / maxScore;
         int x1, x2, x3, x4, x5;
         int y1, y2, y3, y4, y5;
         for (int i = 0; i < map.size(); i++) {
-            Polygon p = new Polygon();
             Double[] coord = map.get(i);
-            x1 = (int) (xScale * (counter) + BORDER_GAP);
-            y1 = (int) ((MAX_SCORE - coord[0]) * yScale + BORDER_GAP);
-            x2 = (int) (xScale * (counter) + BORDER_GAP);
-            y2 = (int) (PREF_H - BORDER_GAP);
+            x1 = (int) (xScale * (counter) + borderGap);
+            y1 = (int) ((maxScore - coord[0]) * yScale + borderGap);
+            x2 = (int) (xScale * (counter) + borderGap);
+            y2 = (int) (prefH - borderGap);
             counter += 2;
-            x3 = (int) (xScale * (counter) + BORDER_GAP);
+            x3 = (int) (xScale * (counter) + borderGap);
             y3 = y2;
-            x4 = (int) (xScale * (counter) + BORDER_GAP);
-            y4 = (int) ((MAX_SCORE - coord[2]) * yScale + BORDER_GAP);
+            x4 = (int) (xScale * (counter) + borderGap);
+            y4 = (int) ((maxScore - coord[2]) * yScale + borderGap);
             counter -= 1;
-            x5 = (int) (xScale * (counter) + BORDER_GAP);
-            y5 = (int) ((MAX_SCORE - coord[1]) * yScale + BORDER_GAP);
+            x5 = (int) (xScale * (counter) + borderGap);
+            y5 = (int) ((maxScore - coord[1]) * yScale + borderGap);
             counter += 1;
+            Polygon p = new Polygon();
             p.addPoint(x1, y1);
             p.addPoint(x2, y2);
             p.addPoint(x3, y3);

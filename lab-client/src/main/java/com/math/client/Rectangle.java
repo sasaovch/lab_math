@@ -7,7 +7,7 @@ public class Rectangle {
 
     private ArrayList<Double[]> points;
 
-    public double main(int start, int finish, Integer numberSplitPoint, WayPoint wayforSplit, Function<Double, Double> funct) {
+    public double main(double start, double finish, Integer numberSplitPoint, WayPoint wayforSplit, Function<Double, Double> funct) {
         double length = finish - start;
         double gap = length / numberSplitPoint;
         double left = start;
@@ -32,7 +32,7 @@ public class Rectangle {
                     result += point * gap;
                     break;
                 case "center" :
-                    point = funct.apply(((left + rigth)/ 2));
+                    point = funct.apply(((left + rigth) / 2));
                     points.add(new Double[]{point});
                     left = rigth;
                     rigth += gap;

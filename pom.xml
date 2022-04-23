@@ -65,8 +65,7 @@
 
 	</build>
 
-<modules>  <module>lab-common</module>
+<modules>
     <module>lab-client</module>
-    <module>lab-server</module>
   </modules>
 </project>

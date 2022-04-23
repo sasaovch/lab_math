@@ -8,7 +8,7 @@ public enum WayPoint {
 
     private String name;
     
-    private WayPoint(String name) {
+    WayPoint(String name) {
         this.name = name;
     }
 

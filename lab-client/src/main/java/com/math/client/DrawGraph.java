@@ -8,27 +8,26 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
+import java.awt.Font;
+import java.awt.Shape;
+import java.awt.font.FontRenderContext;
+import java.awt.font.TextLayout;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.font.*;
-import java.awt.geom.*;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import java.awt.geom.AffineTransform;
 
 
 public class DrawGraph extends JPanel {
-   private final int PREF_W = 1024;
-   private final int PREF_H = 720;
-   private final int BORDER_GAP = 30;
-   private final Color GRAPH_COLOR = Color.green;
-   private final Color GRAPH_POINT_COLOR = new Color(150, 50, 50, 180);
-   private final Stroke GRAPH_STROKE = new BasicStroke(3f);
-   private final int GRAPH_POINT_WIDTH = 1;
-   private final int Y_HATCH_CNT = 1;
-   private final int RESOLUTION = 100;
-   private Double MAX_SCORE;
+   private final int prefW = 1024;
+   private final int prefH = 720;
+   private final int borderGap = 30;
+   private final Color graphColor = Color.green;
+   private final Stroke graphStroke = new BasicStroke(3f);
+   private final int resolution = 100;
+   private Double maxScore;
    private Way way;
    private Double start, finish, gap;
    private ArrayList<Double[]> map;
@@ -45,15 +44,14 @@ public class DrawGraph extends JPanel {
       this.way = way;
       this.funct = funct;
    }
-   
+
    @Override
    protected void paintComponent(Graphics g) {
-      
       super.paintComponent(g);
-      Graphics2D g2 = (Graphics2D)g;
+      Graphics2D g2 = (Graphics2D) g;
       g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-      
-      DrawLog log = new DrawLog(PREF_W, PREF_H, BORDER_GAP, MAX_SCORE);
+      // рисование столбцов
+      DrawLog log = new DrawLog(prefW, prefH, borderGap, maxScore);
       if (way == Way.RECTANGLE) {
          log.drawRect(g2, map, start, finish, gap);
       } else if (way == Way.TRAPEZOID) {
@@ -61,44 +59,23 @@ public class DrawGraph extends JPanel {
       } else {
          log.drawSimp(g2, map, start, finish, gap);
       }
-      
       g2.setColor(Color.GRAY);
-      double xScale = ((double) PREF_W - 2 * BORDER_GAP) / (RESOLUTION);
-      double yScale = ((double) PREF_H - 2 * BORDER_GAP) / MAX_SCORE;
-      
+      // определение шага для оси x и y
+      double xScale = ((double) prefW - 2 * borderGap) / (resolution);
+      double yScale = ((double) prefH - 2 * borderGap) / maxScore;
       List<Point> graphPoints = new ArrayList<Point>();
-
-      for (int i = 0; i <= RESOLUTION; i++) {
-         int x1 = (int) (i * xScale + BORDER_GAP);
-         int y1 = (int) ((MAX_SCORE - scores.get(i)) * yScale + BORDER_GAP);
+      // рисование точек графика функции
+      for (int i = 0; i <= resolution; i++) {
+         int x1 = (int) (i * xScale + borderGap);
+         int y1 = (int) ((maxScore - scores.get(i)) * yScale + borderGap);
          graphPoints.add(new Point(x1, y1));
       }
-
-      // create x and y axes 
-      g2.drawLine(BORDER_GAP, getHeight() - BORDER_GAP, BORDER_GAP, BORDER_GAP);
-      g2.drawLine(BORDER_GAP, getHeight() - BORDER_GAP, getWidth() - BORDER_GAP, getHeight() - BORDER_GAP);
-
-      // create hatch marks for y axis. 
-      for (int i = 0; i < Y_HATCH_CNT; i++) {
-         int x0 = BORDER_GAP;
-         int x1 = GRAPH_POINT_WIDTH + BORDER_GAP;
-         int y0 = getHeight() - (((i + 1) * (getHeight() - BORDER_GAP * 2)) / Y_HATCH_CNT + BORDER_GAP);
-         int y1 = y0;
-         g2.drawLine(x0, y0, x1, y1);
-      }
-
-      // and for x axis
-      for (int i = 0; i < scores.size() - 1; i++) {
-         int x0 = (i + 1) * (getWidth() - BORDER_GAP * 2) / (scores.size() - 1) + BORDER_GAP;
-         int x1 = x0;
-         int y0 = getHeight() - BORDER_GAP;
-         int y1 = y0 - GRAPH_POINT_WIDTH;
-         g2.drawLine(x0, y0, x1, y1);
-      }
-
-      Stroke oldStroke = g2.getStroke();
-      g2.setColor(GRAPH_COLOR);
-      g2.setStroke(GRAPH_STROKE);
+      // рисование оси x и y
+      g2.drawLine(borderGap, getHeight() - borderGap, borderGap, borderGap);
+      g2.drawLine(borderGap, getHeight() - borderGap, getWidth() - borderGap, getHeight() - borderGap);
+      // рисование линии графика функции, соединение точек
+      g2.setColor(graphColor);
+      g2.setStroke(graphStroke);
       for (int i = 0; i < graphPoints.size() - 1; i++) {
          int x1 = graphPoints.get(i).x;
          int y1 = graphPoints.get(i).y;
@@ -106,45 +83,35 @@ public class DrawGraph extends JPanel {
          int y2 = graphPoints.get(i + 1).y;
          g2.drawLine(x1, y1, x2, y2);         
       }
-      
-      g2.setStroke(oldStroke);      
-      g2.setColor(GRAPH_POINT_COLOR);
-      for (int i = 0; i < graphPoints.size(); i++) {
-         int x = graphPoints.get(i).x - GRAPH_POINT_WIDTH / 2;
-         int y = graphPoints.get(i).y - GRAPH_POINT_WIDTH / 2;
-         int ovalW = GRAPH_POINT_WIDTH;
-         int ovalH = GRAPH_POINT_WIDTH;
-         g2.fillOval(x, y, ovalW, ovalH);
-      }
-
-      FontRenderContext frc = g2.getFontRenderContext(); 
-      Font f = new Font("Arial Bold", Font.ITALIC, 30); 
-      AffineTransform at = new AffineTransform(); 
+      // рисование надписи с сообщением
+      FontRenderContext frc = g2.getFontRenderContext();
+      int textSize = 30;
+      Font f = new Font("Arial Bold", Font.ITALIC, textSize);
+      AffineTransform at = new AffineTransform();
       int count = 1;
       g2.setColor(Color.RED);
-      g2.setBackground(Color.RED);
       g2.setFont(f);
+      int textH = 50;
       for (String me : mess) {
          TextLayout tl = new TextLayout(me, f, frc);
-         at.setToTranslation(PREF_W/2-(tl.getBounds().getMaxX())/2, 50 * count++);
-         Shape sh = tl.getOutline(at); 
-         g2.draw(sh); 
+         at.setToTranslation(prefW / 2 - (tl.getBounds().getMaxX()) / 2, textH * count++);
+         Shape sh = tl.getOutline(at);
+         g2.draw(sh);
       }
    }
-   
+
    @Override
    public Dimension getPreferredSize() {
-      return new Dimension(PREF_W, PREF_H);
+      return new Dimension(prefW, prefH);
    }
 
    public void startDraw() {
       scores = new ArrayList<>();
-      for (int i = 0; i <= RESOLUTION ; i++) {
-         scores.add(funct.apply(start + i * (finish - start) / RESOLUTION));
+      // определение значения точек графика функции
+      for (int i = 0; i <= resolution ; i++) {
+         scores.add(funct.apply(start + i * (finish - start) / resolution));
       }
-
-      MAX_SCORE = funct.apply(finish);
-
+      maxScore = funct.apply(finish);
       JFrame frame = new JFrame("DrawGraph");
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       frame.getContentPane().add(this);
@@ -152,12 +119,4 @@ public class DrawGraph extends JPanel {
       frame.setLocationByPlatform(true);
       frame.setVisible(true);
    }
-
-   // public static void start(Double start, Double finish, ArrayList<Double[]> map, Double gap, Function<Double, Double> func, String[] mess, Way way) {
-   //    SwingUtilities.invokeLater(new Runnable() {
-   //       public void run() {
-   //          createAndShowGui(start, finish, map, gap, func, mess, way);
-   //       }
-   //    });
-   // }
 }

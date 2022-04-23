@@ -7,18 +7,20 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.function.Function;
 
-public class App {
+public final class App {
 
-    private final static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-    private final static PrintWriter out = new PrintWriter(System.out, true);
-    private final static Function<Double, Double> funct = s -> Math.pow(s, 2);
+    private static final BufferedReader IN = new BufferedReader(new InputStreamReader(System.in));
+    private static final PrintWriter OUT = new PrintWriter(System.out, true);
+    private static final Function<Double, Double> FUNCTION = s -> Math.pow(s, 2);
+
+    private App() {
+    }
 
     public static void main(String[] args) throws Exception {
+        //ввод способа интегрирования, точки начала и конца, способа разбиения, количества интервалов
         Way way = write("Enter the integration method: rectangle, trapezoid, simpson", s -> Way.valueOf(s.toUpperCase()));
-        int start = write("Enter start point", Integer::parseInt);
-        int finish = write("Enter finish point", Integer::parseInt);
-        double startPoint = (double) start;
-        double finishPoint = (double) finish;
+        double startPoint = write("Enter start point", Double::parseDouble);
+        double finishPoint = write("Enter finish point", Double::parseDouble);
         Integer numberSplitPoint = write("Enter number split points", Integer::parseInt);
         double length = finishPoint - startPoint;
         double gap = length / numberSplitPoint;
@@ -28,37 +30,38 @@ public class App {
         if (way == Way.RECTANGLE) {
             WayPoint wayforSplit = write("Enter way for split: left, rigth, center, random", s -> WayPoint.valueOf(s.toUpperCase()));
             Rectangle r = new Rectangle();
-            result = r.main(start, finish, numberSplitPoint, wayforSplit, funct);
+            result = r.main(startPoint, finishPoint, numberSplitPoint, wayforSplit, FUNCTION);
             points = r.getPoints();
-            mess = new String[]{"Integral = " + String.format("%.10f", result) , "The integration method - " + Way.RECTANGLE.getName(), "Way split - " + wayforSplit, "Number split points = " + numberSplitPoint}; 
+            mess = new String[]{"Integral = " + String.format("%.10f", result), "The integration method - " + Way.RECTANGLE.getName(), "Way split - " + wayforSplit, "Number split points = " + numberSplitPoint};
         } else if (way == Way.TRAPEZOID) {
             Trapezoid t = new Trapezoid();
-            result = t.main(start, finish, numberSplitPoint, funct);
-            points =t.getPoints();
-            mess = new String[]{"Integral = " + String.format("%.10f", result) , "The integration method - " + Way.TRAPEZOID.getName(), "Number split points = " + numberSplitPoint}; 
+            result = t.main(startPoint, finishPoint, numberSplitPoint, FUNCTION);
+            points = t.getPoints();
+            mess = new String[]{"Integral = " + String.format("%.10f", result), "The integration method - " + Way.TRAPEZOID.getName(), "Number split points = " + numberSplitPoint};
         } else if (way == Way.SIMPSON) {
             Simpson s = new Simpson();
-            result = s.main(start, finish, numberSplitPoint, funct);
-            points =s.getPoints();
-            mess = new String[]{"Integral = " + String.format("%.10f", result) , "The integration method - " + Way.SIMPSON.getName(), "Number split points = " + numberSplitPoint}; 
+            result = s.main(startPoint, finishPoint, numberSplitPoint, FUNCTION);
+            points = s.getPoints();
+            mess = new String[]{"Integral = " + String.format("%.10f", result), "The integration method - " + Way.SIMPSON.getName(), "Number split points = " + numberSplitPoint};
         }
-        out.printf("Result = %.10f", result);
-        DrawGraph gr = new DrawGraph(startPoint, finishPoint, gap, points, x -> Math.pow(x, 2), mess, way);
+        OUT.printf("Result = %.10f", result);
+        //начало рисования графика
+        DrawGraph gr = new DrawGraph(startPoint, finishPoint, gap, points, FUNCTION, mess, way);
         gr.startDraw();
     }
-    
-    public static <T> T write(String message, Function<String, T> funct) throws IOException {
+
+    public static <T> T write(String message, Function<String, T> converter) throws IOException {
         while (true) {
-            out.println(message);
-            out.printf("%s", ">>>");
-            String line = in.readLine().trim();
+            OUT.println(message);
+            OUT.printf("%s", ">>>");
+            String line = IN.readLine().trim();
             T result;
             try {
-                result = funct.apply(line);
+                result = converter.apply(line);
             } catch (IllegalArgumentException e) {
-                out.println("It isn't correct");
+                OUT.println("It isn't correct");
                 continue;
-            } 
+            }
             return result;
         }
     }
