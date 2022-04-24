@@ -28,7 +28,7 @@ public final class App {
         double result = 0;
         String[] mess = null;
         if (way == Way.RECTANGLE) {
-            WayPoint wayforSplit = write("Enter way for split: left, rigth, center, random", s -> WayPoint.valueOf(s.toUpperCase()));
+            WayPoint wayforSplit = write("Enter way for split: left, right, center, random", s -> WayPoint.valueOf(s.toUpperCase()));
             Rectangle r = new Rectangle();
             result = r.main(startPoint, finishPoint, numberSplitPoint, wayforSplit, FUNCTION);
             points = r.getPoints();

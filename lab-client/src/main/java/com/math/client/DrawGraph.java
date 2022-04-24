@@ -106,12 +106,15 @@ public class DrawGraph extends JPanel {
    }
 
    public void startDraw() {
+      maxScore = Double.MIN_VALUE;
       scores = new ArrayList<>();
       // определение значения точек графика функции
       for (int i = 0; i <= resolution ; i++) {
          scores.add(funct.apply(start + i * (finish - start) / resolution));
+         if (maxScore < funct.apply(start + i * (finish - start) / resolution)) {
+            maxScore = funct.apply(start + i * (finish - start) / resolution);
+         }
       }
-      maxScore = funct.apply(finish);
       JFrame frame = new JFrame("DrawGraph");
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       frame.getContentPane().add(this);
